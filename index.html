@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaastu Building - Cleaning Status Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #4472C4;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .date {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4472C4;
+            margin: 10px 0;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stat-card.completed .number {
+            color: #28a745;
+        }
+
+        .stat-card.pending .number {
+            color: #ffc107;
+        }
+
+        .staff-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .staff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #4472C4;
+        }
+
+        .staff-header h2 {
+            color: #4472C4;
+            font-size: 1.8em;
+        }
+
+        .staff-header.staff2 {
+            border-bottom-color: #C65911;
+        }
+
+        .staff-header.staff2 h2 {
+            color: #C65911;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .task-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .task-card.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .task-card.pending {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .task-time {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .task-name {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .task-area {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .task-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .task-status.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .task-status.pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .task-completed-time {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab.active {
+            background: #4472C4;
+            color: white;
+        }
+
+        .filter-tab:hover {
+            transform: translateY(-2px);
+        }
+
+        .refresh-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .auto-refresh {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 Vaastu Building Cleaning Dashboard</h1>
+            <div class="date" id="currentDate"></div>
+            <div class="auto-refresh">🔄 Auto-refresh every 30 seconds</div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be populated here -->
+        </div>
+
+        <div class="staff-section">
+            <div class="staff-header">
+                <h2>👨‍💼 Staff 1 - Today's Tasks</h2>
+                <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh Now</button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="staff1Progress">0%</div>
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterTasks('staff1', 'all')">All Tasks</button>
+                <button class="filter-tab" onclick="filterTasks('staff1', 'completed')">✅ Completed</button>
+                <button class="filter-tab" onclick="filterTasks('staff1', 'pending')">⏳ Pending</button>
+            </div>
+            <div class="tasks-grid" id="staff1Tasks">
+                <div class="loading">Loading tasks...</div>
+            </div>
+        </div>
+
+        <div class="staff-section">
+            <div class="staff-header staff2">
+                <h2>👨‍💼 Staff 2 - Today's Tasks</h2>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="staff2Progress">0%</div>
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterTasks('staff2', 'all')">All Tasks</button>
+                <button class="filter-tab" onclick="filterTasks('staff2', 'completed')">✅ Completed</button>
+                <button class="filter-tab" onclick="filterTasks('staff2', 'pending')">⏳ Pending</button>
+            </div>
+            <div class="tasks-grid" id="staff2Tasks">
+                <div class="loading">Loading tasks...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION - Replace this URL with your Google Apps Script Web App URL
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        
+        let currentFilter = {
+            staff1: 'all',
+            staff2: 'all'
+        };
+
+        // Get current day
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const today = days[new Date().getDay()];
+
+        // Update date display
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getTodayTasks&day=${today}&date=${new Date().toISOString().split('T')[0]}`);
+                const data = await response.json();
+                
+                updateStats(data);
+                updateStaffSection('staff1', data.staff1 || []);
+                updateStaffSection('staff2', data.staff2 || []);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error loading data. Please check your connection and configuration.');
+            }
+        }
+
+        function updateStats(data) {
+            const staff1Tasks = data.staff1 || [];
+            const staff2Tasks = data.staff2 || [];
+            
+            const totalTasks = staff1Tasks.length + staff2Tasks.length;
+            const completedTasks = staff1Tasks.filter(t => t.status === 'completed').length + 
+                                  staff2Tasks.filter(t => t.status === 'completed').length;
+            const pendingTasks = totalTasks - completedTasks;
+            const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="label">Total Tasks</div>
+                    <div class="number">${totalTasks}</div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="label">✅ Completed</div>
+                    <div class="number">${completedTasks}</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="label">⏳ Pending</div>
+                    <div class="number">${pendingTasks}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Completion Rate</div>
+                    <div class="number">${completionRate}%</div>
+                </div>
+            `;
+        }
+
+        function updateStaffSection(staffId, tasks) {
+            const completed = tasks.filter(t => t.status === 'completed').length;
+            const total = tasks.length;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            // Update progress bar
+            document.getElementById(`${staffId}Progress`).style.width = `${percentage}%`;
+            document.getElementById(`${staffId}Progress`).textContent = `${percentage}% (${completed}/${total})`;
+
+            // Filter tasks
+            const filteredTasks = filterTasksByStatus(tasks, currentFilter[staffId]);
+
+            // Update tasks display
+            const tasksHtml = filteredTasks.map(task => `
+                <div class="task-card ${task.status}">
+                    <div class="task-time">⏰ ${task.time}</div>
+                    <div class="task-name">${task.task}</div>
+                    <div class="task-area">📍 ${task.area}</div>
+                    <div class="task-status ${task.status}">
+                        ${task.status === 'completed' ? '✅ Completed' : '⏳ Pending'}
+                    </div>
+                    ${task.status === 'completed' && task.completedAt ? 
+                        `<div class="task-completed-time">Completed at: ${new Date(task.completedAt).toLocaleTimeString()}</div>` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById(`${staffId}Tasks`).innerHTML = tasksHtml || '<div class="loading">No tasks for this filter</div>';
+        }
+
+        function filterTasksByStatus(tasks, status) {
+            if (status === 'all') return tasks;
+            return tasks.filter(t => t.status === status);
+        }
+
+        function filterTasks(staffId, status) {
+            currentFilter[staffId] = status;
+            
+            // Update active tab
+            const tabs = document.querySelectorAll(`#${staffId}Tasks`).previousElementSibling.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Reload dashboard
+            loadDashboard();
+        }
+
+        // Handle QR code scans (when accessing with ?action=complete&qr=XXX)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'complete') {
+            const qrCode = urlParams.get('qr');
+            completeTask(qrCode);
+        }
+
+        async function completeTask(qrCode) {
+            try {
+                const response = await fetch(`${SCRIPT_URL}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'completeTask',
+                        qr: qrCode,
+                        date: new Date().toISOString().split('T')[0],
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Task completed successfully!');
+                    window.location.href = window.location.origin + window.location.pathname;
+                } else {
+                    alert('❌ Error completing task. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error completing task:', error);
+                alert('❌ Error completing task. Please check your connection.');
+            }
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+
+        // Initial load
+        loadDashboard();
+    </script>
+</body>
+</html>
